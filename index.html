@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroPredict AI | Health Platform</title>
+    <!-- three.js scripts have been removed -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --font-size-base: 16px;
+            --primary-color: #08d9d6; --secondary-color: #252a34; --accent-color: #ff2e63;
+            --background-color: #0d1117; --card-background: rgba(37, 42, 52, 0.85);
+            --text-color: #eaeaea; --subtle-text: #8b949e; --border-color: rgba(139, 148, 158, 0.3);
+            --success-color: #28a745; --danger-color: #dc3545;
+        }
+
+        .high-contrast {
+            --primary-color: #ffff00; --secondary-color: #000000; --accent-color: #ff00ff;
+            --background-color: #000000; --card-background: rgba(20, 20, 20, 0.9);
+            --text-color: #ffffff; --subtle-text: #cccccc; --border-color: #ffffff;
+        }
+
+        html { font-size: var(--font-size-base); }
+        body {
+            font-family: 'Inter', sans-serif; background-color: var(--background-color);
+            background-image: radial-gradient(circle, var(--secondary-color) 0%, var(--background-color) 100%);
+            background-attachment: fixed; color: var(--text-color); margin: 0; padding: 2rem; transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .main-container {
+            max-width: 900px; margin: auto; background-color: var(--card-background); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2.5rem; border: 1px solid var(--border-color); animation: fadeIn 1s ease-out; transition: background-color 0.3s;
+        }
+
+        header { text-align: center; margin-bottom: 2.5rem; position: relative; }
+        h1 { 
+            font-size: 2.8rem; font-weight: 700; 
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color)); 
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 0 0 0.5rem 0; 
+        }
+        .quote { font-size: 1.1rem; color: var(--subtle-text); font-style: italic; transition: color 0.3s;}
+
+        .tabs { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; flex-wrap: wrap;}
+        .tab-button { background: none; border: none; padding: 10px 15px; font-size: 0.95rem; font-weight: 600; color: var(--subtle-text); cursor: pointer; border-radius: 8px; transition: background-color 0.3s, color 0.3s; }
+        .tab-button.active { background-color: var(--primary-color); color: var(--background-color); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: contentFadeIn 0.5s; }
+        @keyframes contentFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h2 { font-size: 1.8rem; font-weight: 600; color: var(--text-color); margin-top: 0; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: color 0.3s;}
+        .section-icon { width: 32px; height: 32px; color: var(--primary-color); transition: color 0.3s;}
+
+        /* --- Accessibility Toolbar --- */
+        .accessibility-toolbar { position: absolute; top: 0; right: 0; background-color: var(--card-background); padding: 8px; border-radius: 8px; display: flex; gap: 8px; border: 1px solid var(--border-color); }
+        .access-btn { background-color: var(--secondary-color); color: var(--text-color); border: 1px solid var(--border-color); width: 30px; height: 30px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* --- AI Assistant Styles --- */
+        #chat-window { height: 300px; overflow-y: auto; background-color: var(--secondary-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); }
+        .chat-message { margin-bottom: 1rem; }
+        .chat-message.user { text-align: right; }
+        .chat-message p { background-color: var(--background-color); padding: 10px 15px; border-radius: 15px; display: inline-block; max-width: 80%; text-align: left; }
+        .chat-message.user p { background-color: var(--primary-color); color: var(--secondary-color); }
+        #chat-input-area { display: flex; gap: 1rem; }
+        #chat-input { flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--secondary-color); color: var(--text-color); }
+        #send-btn { padding: 10px 20px; }
+        
+        /* --- Health Challenges Styles --- */
+        .challenge-card { background-color: var(--secondary-color); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
+        .challenge-header { display: flex; justify-content: space-between; align-items: center; }
+        .challenge-header h3 { margin: 0; font-size: 1.2rem; color: var(--primary-color); }
+        .progress-bar { background-color: var(--background-color); border-radius: 5px; height: 10px; margin: 1rem 0; }
+        .progress-bar-inner { background-color: var(--primary-color); height: 100%; border-radius: 5px; width: 0%; transition: width 0.5s ease; }
+        .streak-days { display: flex; gap: 5px; margin-top: 1rem; }
+        .streak-day { flex: 1; height: 30px; background-color: var(--background-color); border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        .streak-day.complete { background-color: var(--success-color); }
+
+        ul { list-style-type: '✔ '; padding-left: 20px; }
+        li { margin-bottom: 0.75rem; line-height: 1.6; }
+        .upload-area { 
+            text-align: center; 
+            border: 2px dashed var(--border-color); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: background-color 0.2s, border-color 0.2s; 
+            /* Added for robust centering */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+        .upload-area:hover { background-color: rgba(8, 217, 214, 0.1); border-color: var(--primary-color); }
+        input[type="file"] { display: none; }
+        #image-preview { max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 1rem; }
+        .btn { color: #0d1117; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: linear-gradient(45deg, var(--primary-color), #f9f871); margin-top: 1.5rem; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 7px 25px rgba(8, 217, 214, 0.4); }
+        .loader { border: 4px solid var(--secondary-color); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 1.5rem auto 0 auto; display: none; }
+        #result-text { font-size: 1.3rem; font-weight: 600; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1.5rem;}
+        .result-normal { color: var(--success-color); background-color: rgba(40, 167, 69, 0.1); } 
+        .result-hemorrhage { color: var(--danger-color); background-color: rgba(220, 53, 69, 0.1); }
+        .bmi-calculator { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: center; }
+        .bmi-calculator input { width: calc(100% - 20px); padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--secondary-color); color: var(--text-color); }
+        #bmi-result { margin-top: 1.5rem; font-size: 1.2rem; font-weight: 600; text-align: center; }
+        .footer-caution { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); color: var(--subtle-text); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <div class="accessibility-toolbar">
+                <button class="access-btn" onclick="toggleContrast()">C</button>
+                <button class="access-btn" onclick="changeFontSize(-1)">A-</button>
+                <button class="access-btn" onclick="changeFontSize(1)">A+</button>
+            </div>
+            <h1>NeuroPredict AI</h1>
+            <p class="quote" id="quote-text"></p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'Analyzer')">Scan Analyzer</button>
+            <button class="tab-button" onclick="openTab(event, 'AIAssistant')">AI Assistant</button>
+            <button class="tab-button" onclick="openTab(event, 'Challenges')">Challenges</button>
+            <button class="tab-button" onclick="openTab(event, 'Symptoms')">Symptoms</button>
+            <button class="tab-button" onclick="openTab(event, 'Prevention')">Prevention</button>
+            <!-- 3D Brain Model tab has been removed -->
+            <button class="tab-button" onclick="openTab(event, 'BMI')">BMI Calculator</button>
+        </div>
+
+        <!-- Scan Analyzer Tab -->
+        <div id="Analyzer" class="tab-content active">
+            <h2>Deep Learning Stroke Detector</h2>
+            <label for="image-upload-input" class="upload-area">
+                <p id="upload-label">Click to select a brain CT scan</p><img id="image-preview" src="#" alt="Image Preview" style="display:none;"></label>
+            <input type="file" id="image-upload-input" accept="image/*">
+            <div class="loader" id="loader"></div>
+            <div id="result-container" style="display:none;"><div id="result-text"></div></div>
+        </div>
+
+        <!-- AI Assistant Tab -->
+        <div id="AIAssistant" class="tab-content">
+            <h2>AI Health Assistant</h2>
+            <div id="chat-window"></div>
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Ask a health-related question...">
+                <button class="btn" id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Health Challenges Tab -->
+        <div id="Challenges" class="tab-content">
+            <h2>Health Habit Challenges</h2>
+            <div id="challenges-container"></div>
+        </div>
+
+        <!-- Symptoms Tab -->
+        <div id="Symptoms" class="tab-content">
+             <h2>
+                <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                Common Stroke Symptoms (F.A.S.T.)
+            </h2>
+            <ul>
+                <li><strong>Face Drooping:</strong> One side of the face droops or is numb. Ask the person to smile. Is the person's smile uneven?</li>
+                <li><strong>Arm Weakness:</strong> One arm is weak or numb. Ask the person to raise both arms. Does one arm drift downward?</li>
+                <li><strong>Speech Difficulty:</strong> Slurred speech, inability to speak, or hard to understand. Ask the person to repeat a simple sentence. Is the sentence repeated correctly?</li>
+                <li><strong>Time to Call Emergency Services:</strong> If someone shows any of these symptoms, even if the symptoms go away, call for help immediately and get the person to a hospital.</li>
+            </ul>
+        </div>
+
+        <!-- Prevention Tab -->
+        <div id="Prevention" class="tab-content">
+             <h2>
+                <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
+                Key Prevention Strategies
+            </h2>
+            <ul>
+                <li><strong>Control Blood Pressure:</strong> High blood pressure is a leading cause of stroke. Work with your doctor to manage it.</li>
+                <li><strong>Eat a Healthy Diet:</strong> Focus on fruits, vegetables, whole grains, and lean proteins.</li>
+                <li><strong>Maintain a Healthy Weight:</strong> Losing even a small amount of weight can have a significant impact on your stroke risk.</li>
+                <li><strong>Regular Physical Activity:</strong> Aim for at least 150 minutes of moderate-intensity aerobic activity each week.</li>
+                <li><strong>Don't Smoke:</strong> Smoking thickens your blood and increases the amount of plaque buildup in the arteries.</li>
+                <li><strong>Limit Alcohol:</strong> Drink alcohol in moderation, if at all.</li>
+            </ul>
+        </div>
+        
+        <!-- 3D Brain Model Tab has been removed -->
+
+        <!-- BMI Calculator Tab -->
+        <div id="BMI" class="tab-content">
+             <h2>
+                 <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3" /></svg>
+                Body Mass Index (BMI) Calculator
+            </h2>
+            <div class="bmi-calculator">
+                <div><label for="height">Height (cm)</label><input type="number" id="height" placeholder="e.g., 175"></div>
+                <div><label for="weight">Weight (kg)</label><input type="number" id="weight" placeholder="e.g., 70"></div>
+                <div><label for="age">Age</label><input type="number" id="age" placeholder="e.g., 30"></div>
+                <button class="btn" onclick="calculateBMI()" style="grid-column: 1 / -1;">Calculate BMI</button>
+            </div>
+            <div id="bmi-result"></div>
+        </div>
+        
+        <div class="footer-caution"><p><strong>Disclaimer:</strong> This is a capstone project for educational purposes only. It is not a medical tool and should not be used for self-diagnosis or treatment. Always consult a qualified medical professional for any health concerns.</p></div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const quotes = ["The first wealth is health.", "A healthy outside starts from the inside.", "To keep the body in good health is a duty."];
+        document.getElementById('quote-text').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+        renderChallenges();
+        document.getElementById('chat-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendMessage(); });
+    });
+
+    let currentFontSize = 16;
+    function toggleContrast() { document.body.classList.toggle('high-contrast'); }
+    function changeFontSize(amount) {
+        currentFontSize += amount;
+        currentFontSize = Math.max(12, Math.min(22, currentFontSize)); // Clamp font size
+        document.documentElement.style.setProperty('--font-size-base', `${currentFontSize}px`);
+    }
+    
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = "none");
+        document.querySelectorAll('.tab-button').forEach(btn => btn.className = btn.className.replace(" active", ""));
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+        // Logic for initializing the brain model has been removed
+    }
+
+    const chatWindow = document.getElementById('chat-window');
+    const chatInput = document.getElementById('chat-input');
+    
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        addMessageToChat('user', message);
+        chatInput.value = '';
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/chatbot', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+            const aiResponse = data.response || data.error || "Sorry, I couldn't get a response.";
+            addMessageToChat('ai', aiResponse);
+        } catch (error) {
+            addMessageToChat('ai', 'Error connecting to the AI assistant.');
+        }
+    }
+
+    function addMessageToChat(sender, text) {
+        const messageElement = document.createElement('div');
+        messageElement.className = `chat-message ${sender}`;
+        const p = document.createElement('p');
+        p.textContent = text;
+        messageElement.appendChild(p);
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    const challenges = [
+        { id: 'walk', title: '7-Day Walking Streak', description: 'Walk for at least 30 minutes every day for a week.' },
+        { id: 'water', title: 'Hydration Challenge', description: 'Drink 8 glasses of water daily for 7 days.' }
+    ];
+
+    function renderChallenges() {
+        const container = document.getElementById('challenges-container');
+        container.innerHTML = '';
+        challenges.forEach(challenge => {
+            const progress = JSON.parse(localStorage.getItem(challenge.id)) || Array(7).fill(false);
+            const completedDays = progress.filter(Boolean).length;
+            const card = document.createElement('div');
+            card.className = 'challenge-card';
+            card.innerHTML = `
+                <div class="challenge-header">
+                    <h3>${challenge.title}</h3>
+                    <span>${completedDays} / 7 Days</span>
+                </div>
+                <p>${challenge.description}</p>
+                <div class="progress-bar">
+                    <div class="progress-bar-inner" style="width: ${ (completedDays / 7) * 100 }%;"></div>
+                </div>
+                <div class="streak-days">
+                    ${progress.map((day, index) => `<div class="streak-day ${day ? 'complete' : ''}" onclick="toggleDay('${challenge.id}', ${index})"></div>`).join('')}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function toggleDay(challengeId, dayIndex) {
+        let progress = JSON.parse(localStorage.getItem(challengeId)) || Array(7).fill(false);
+        progress[dayIndex] = !progress[dayIndex];
+        localStorage.setItem(challengeId, JSON.stringify(progress));
+        renderChallenges();
+    }
+
+    const fileInput = document.getElementById('image-upload-input');
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) { document.getElementById('image-preview').src = e.target.result; document.getElementById('image-preview').style.display = 'block'; };
+        reader.readAsDataURL(file);
+        document.getElementById('upload-label').textContent = `Selected: ${file.name}`;
+        predictImage(file);
+    }
+    
+    async function predictImage(file) {
+        const resultContainer = document.getElementById('result-container');
+        const resultText = document.getElementById('result-text');
+        const loader = document.getElementById('loader');
+        const formData = new FormData();
+        formData.append('file', file);
+        loader.style.display = 'block';
+        resultContainer.style.display = 'none';
+        try {
+            const response = await fetch('http://127.0.0.1:5000/predict', { method: 'POST', body: formData });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Prediction failed.');
+            const confidence = (data.confidence_score * 100).toFixed(2);
+            resultText.innerHTML = `Result: <strong>${data.prediction}</strong><br><small>Confidence: ${confidence}%</small>`;
+            resultText.className = data.prediction === "Normal" ? 'result-normal' : 'result-hemorrhage';
+        } catch (error) {
+            resultText.textContent = `Error: ${error.message}`;
+            resultText.className = 'result-hemorrhage';
+        } finally {
+            loader.style.display = 'none';
+            resultContainer.style.display = 'block';
+        }
+    }
+    
+    function calculateBMI() {
+        const height = document.getElementById('height').value;
+        const weight = document.getElementById('weight').value;
+        const age = document.getElementById('age').value;
+        const resultDiv = document.getElementById('bmi-result');
+        if (!height || !weight || !age || height <= 0 || weight <= 0 || age <= 0) {
+            resultDiv.textContent = 'Please enter valid height, weight, and age.'; return;
+        }
+        const heightInMeters = height / 100;
+        const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
+        let category = '';
+        if (bmi < 18.5) category = 'Underweight';
+        else if (bmi >= 18.5 && bmi <= 24.9) category = 'Normal weight';
+        else if (bmi >= 25 && bmi <= 29.9) category = 'Overweight';
+        else category = 'Obesity';
+        resultDiv.innerHTML = `For an adult aged <strong>${age}</strong>, your BMI is <strong>${bmi}</strong>. This is considered: <strong>${category}</strong>.`;
+    }
+    
+    // The initBrainModel function has been completely removed.
+</script>
+</body>
+</html>
+
+
